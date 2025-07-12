@@ -18,9 +18,7 @@ for (const [key, value] of Object.entries(vocab)) {
 
 // Token to semantic text mapping
 function convertTokensToSemantic(tokens) {
-  console.log('Input tokens:', tokens);
   const semanticTokens = tokens.map(token => reverseVocab[token]).filter(token => token);
-  console.log('Semantic tokens:', semanticTokens);
   
   // Ensure proper musical structure: clef + timeSignature + notes + barline
   let result = [];
@@ -62,16 +60,7 @@ function convertTokensToSemantic(tokens) {
   }
   
   // return result.join(' ');
-  const output = semanticTokens.join(' ');
-  console.log('Final semantic output:', output);
-  
-  // If empty, provide a default musical phrase
-  if (!output.trim()) {
-    console.log('Empty output, using default phrase');
-    return 'clef-G2 timeSignature-4/4 note-C4_quarter note-D4_quarter note-E4_quarter note-F4_quarter barline';
-  }
-  
-  return output;
+  return semanticTokens.join('  ')
 }
 
 // Python image preprocessing function
@@ -84,21 +73,32 @@ async function preprocessImagePython(imagePath) {
     const pythonProcess = spawn(pythonPath, [pythonScript, imagePath, outputJsonPath]);
     
     let stderr = '';
+    let stdout = '';
+    
+    pythonProcess.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
     
     pythonProcess.stderr.on('data', (data) => {
       stderr += data.toString();
     });
     
     pythonProcess.on('close', async (code) => {
+      console.log('Python preprocessing stdout:', stdout);
+      console.log('Python preprocessing stderr:', stderr);
+      console.log('Python preprocessing exit code:', code);
+      
       if (code !== 0) {
         reject(new Error(`Python preprocessing failed with code ${code}: ${stderr}`));
         return;
       }
       
       try {
+        // Read the processed data
         const resultData = await fs.promises.readFile(outputJsonPath, 'utf8');
         const result = JSON.parse(resultData);
         
+        // Clean up temp file
         await fs.promises.unlink(outputJsonPath).catch(() => {});
         
         if (!result.success) {
