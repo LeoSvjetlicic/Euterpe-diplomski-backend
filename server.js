@@ -25,41 +25,6 @@ function convertTokensToSemantic(tokens) {
   let hasClef = false;
   let hasTimeSignature = false;
   
-  // for (const token of semanticTokens) {
-  //   if (token.startsWith('clef-')) {
-  //     if (!hasClef) {
-  //       result.push(token);
-  //       hasClef = true;
-  //     }
-  //   } else if (token.startsWith('timeSignature-')) {
-  //     if (!hasTimeSignature && hasClef) {
-  //       result.push(token);
-  //       hasTimeSignature = true;
-  //     }
-  //   } else if (token.startsWith('note-') || token.startsWith('rest-')) {
-  //     if (!hasClef) {
-  //       result.push('clef-G2');
-  //       hasClef = true;
-  //     }
-  //     if (!hasTimeSignature) {
-  //       result.push('timeSignature-4/4');
-  //       hasTimeSignature = true;
-  //     }
-  //     result.push(token);
-  //   }else if (token === 'barline') {
-  //     // Only add barline if we have notes before it
-  //     if (result.length > 2) {
-  //       result.push(token);
-  //     }
-  //   }
-  // }
-  
-  // Ensure we end with a barline if we have musical content
-  if (result.length > 2 && !result[result.length - 1].includes('barline')) {
-    result.push('barline');
-  }
-  
-  // return result.join(' ');
   return semanticTokens.join('  ')
 }
 
@@ -73,32 +38,21 @@ async function preprocessImagePython(imagePath) {
     const pythonProcess = spawn(pythonPath, [pythonScript, imagePath, outputJsonPath]);
     
     let stderr = '';
-    let stdout = '';
-    
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
     
     pythonProcess.stderr.on('data', (data) => {
       stderr += data.toString();
     });
     
     pythonProcess.on('close', async (code) => {
-      console.log('Python preprocessing stdout:', stdout);
-      console.log('Python preprocessing stderr:', stderr);
-      console.log('Python preprocessing exit code:', code);
-      
       if (code !== 0) {
         reject(new Error(`Python preprocessing failed with code ${code}: ${stderr}`));
         return;
       }
       
       try {
-        // Read the processed data
         const resultData = await fs.promises.readFile(outputJsonPath, 'utf8');
         const result = JSON.parse(resultData);
         
-        // Clean up temp file
         await fs.promises.unlink(outputJsonPath).catch(() => {});
         
         if (!result.success) {
