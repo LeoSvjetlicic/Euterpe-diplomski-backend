@@ -1,0 +1,15 @@
+node_modules/
+uploads/*
+!uploads/.gitkeep
+.env
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.jar
