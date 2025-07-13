@@ -20,12 +20,7 @@ for (const [key, value] of Object.entries(vocab)) {
 function convertTokensToSemantic(tokens) {
   const semanticTokens = tokens.map(token => reverseVocab[token]).filter(token => token);
   
-  // Ensure proper musical structure: clef + timeSignature + notes + barline
-  let result = [];
-  let hasClef = false;
-  let hasTimeSignature = false;
-  
-  return semanticTokens.join('  ')
+  return semanticTokens.join(' ')
 }
 
 // Python image preprocessing function
